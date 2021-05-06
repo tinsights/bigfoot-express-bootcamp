@@ -1,3 +1,1 @@
-# Rocket Academy Coding Bootcamp
-
-## Bigfoot Express
+# Rocket Academy Coding Bootcamp: Bigfoot Express
