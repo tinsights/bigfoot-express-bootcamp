@@ -15,8 +15,22 @@ const sightingByIndex = (req, res) => {
     const sightingArray = jsonObj.sightings;
     const desiredIndex = req.params.index;
     if (desiredIndex < sightingArray.length) {
-      res.send(sightingArray[req.params.index]);
+      const sighting = sightingArray[req.params.index];
+      const content = `
+                        <html>
+                          <body>
+                            <h1>BIGFOOT SIGHTINGS</h1>
+                            <h2>SIGHTING No. ${+desiredIndex + 1}
+                            <div>
+                              <p>YEAR: ${sighting.YEAR}</p>
+                              <p>STATE: ${sighting.STATE}</p>
+                              <p>OBSERVED BY: ${sighting.OBSERVED}
+                          </body>
+                        </html>
+                      `;
+      res.send(content);
     } else {
+      // 400 notti request
       res.status(400).send('No such sighting');
     }
   });
