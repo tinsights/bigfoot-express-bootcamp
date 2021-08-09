@@ -2,6 +2,8 @@ import express from 'express';
 import { read } from './jsonFileStorage.js';
 
 const app = express();
+// set ejs as the view engine, default folder ./views/
+app.set('view engine', 'ejs');
 
 // generic landing page
 const handleIncomingRequest = (request, response) => {
@@ -9,13 +11,18 @@ const handleIncomingRequest = (request, response) => {
   response.send('yay');
 };
 
+// function that returns one specific sighting if it exists
 const sightingByIndex = (req, res) => {
   read('data.json', (err, jsonObj) => {
     if (err) throw err;
+    // get sightings array from JSON
     const sightingArray = jsonObj.sightings;
+    // get index from url
     const desiredIndex = req.params.index;
+    // check if index exists
     if (desiredIndex < sightingArray.length) {
       const sighting = sightingArray[req.params.index];
+      // using +desiredIndex below for sneaky change to Number from String.
       const content = `
                         <html>
                           <body>
@@ -30,8 +37,64 @@ const sightingByIndex = (req, res) => {
                       `;
       res.send(content);
     } else {
-      // 400 notti request
+      // 400 notti notti request
       res.status(400).send('No such sighting');
+    }
+  });
+};
+
+// COMFORTABLE
+// function that returns a /year-sightings/:year request
+// MORE COMFORTABLE
+// if no year specified, returns entire database sorted by STATE
+// sorts by asc/desc if query specified.
+const sightingsByYear = (req, res) => {
+  read('data.json', (err, jsonObj) => {
+    if (err) throw err;
+    // get sightings array from JSON
+    const sightingArray = jsonObj.sightings;
+    console.log(sightingArray.length);
+    // get year from url
+    // leaving it as string for comparison with value in JSON.
+    const desiredYear = req.params.year;
+    let results = [];
+    if (!desiredYear) {
+      // if no year specified, return the entire database
+      results = [...sightingArray];
+    }
+    else {
+    // get array of sightings from required year
+    // will be incomplete list as some sightings have
+    // "YEAR: early 1990s" or "YEAR: 2000/01"
+    // tried using .includes() but couldn't get it to work - must be another way
+      results = sightingArray.filter((sighting) => sighting.YEAR === desiredYear);
+    }
+    // send results back only if any exists
+    if (results.length > 0) {
+      // is there a more concise way of doing this?
+      const content = results.map((sighting) => ({
+        YEAR: sighting.YEAR,
+        STATE: sighting.STATE,
+      }));
+      // half assed attempt at sorting
+      // not the best, default isn't exactly alphabetical.
+      switch (req.query.sort) {
+        case ('asc'):
+          content.sort((a, b) => (Number(a.YEAR) - Number(b.YEAR)));
+          break;
+        case ('desc'):
+          content.sort((a, b) => (Number(b.YEAR) - Number(a.YEAR)));
+          break;
+        default:
+          content.sort((a, b) => (a.STATE <= b.STATE ? 1 : -1));
+          break;
+      }
+      console.log(content.length);
+      res.send(content);
+    }
+    else {
+      // 400 BAD REQUEST
+      res.status(400).send('No sightings for that year.');
     }
   });
 };
@@ -39,6 +102,8 @@ const sightingByIndex = (req, res) => {
 // GET method routers
 app.get('/', handleIncomingRequest);
 app.get('/sightings/:index', sightingByIndex);
+// comfortable / more comfortable
+app.get('/year-sightings/:year?', sightingsByYear);
 
 // this line is only reached if and only if no other
 // app.get event loop fires. i.e. for any route not defined.
