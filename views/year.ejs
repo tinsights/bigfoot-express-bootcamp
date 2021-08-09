@@ -4,17 +4,19 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title %> | <%= sighting.REPORT_NUMBER %></title>
+    <title><a href="/"> <%= title %></title>
   </head>
   <body>
     <h1>
       <a href="/"> <%= title %> </a>
     </h1>
+    <% sightings.forEach((sighting, index) => { %>
     <h2>REPORT No. <%= sighting.REPORT_NUMBER %></h2>
     <div>
       <p>YEAR: <%= sighting.YEAR %></p>
       <p>STATE: <%= sighting.STATE %></p>
       <p>OBSERVATIONS: <%= sighting.OBSERVED %></p>
     </div>
+    <% }) %>
   </body>
 </html>

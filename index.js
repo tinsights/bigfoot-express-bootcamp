@@ -71,45 +71,43 @@ const sightingsByYear = (req, res) => {
   read('data.json', (err, jsonObj) => {
     if (err) throw err;
     // get sightings array from JSON
-    const sightingArray = jsonObj.sightings;
-    console.log(sightingArray.length);
+    const sightingsArray = jsonObj.sightings;
     // get year from url
     // leaving it as string for comparison with value in JSON.
     const desiredYear = req.params.year;
     let results = [];
     if (!desiredYear) {
       // if no year specified, return the entire database
-      results = [...sightingArray];
+      results = [...sightingsArray];
     }
     else {
     // get array of sightings from required year
     // will be incomplete list as some sightings have
     // "YEAR: early 1990s" or "YEAR: 2000/01"
     // tried using .includes() but couldn't get it to work - must be another way
-      results = sightingArray.filter((sighting) => sighting.YEAR === desiredYear);
+      results = sightingsArray.filter((sighting) => sighting.YEAR === desiredYear);
     }
     // send results back only if any exists
     if (results.length > 0) {
-      // is there a more concise way of doing this?
-      const content = results.map((sighting) => ({
-        YEAR: sighting.YEAR,
-        STATE: sighting.STATE,
-      }));
       // half assed attempt at sorting
       // not the best, default isn't exactly alphabetical.
       switch (req.query.sort) {
         case ('asc'):
-          content.sort((a, b) => (Number(a.YEAR) - Number(b.YEAR)));
+          results.sort((a, b) => (Number(a.YEAR) - Number(b.YEAR)));
           break;
         case ('desc'):
-          content.sort((a, b) => (Number(b.YEAR) - Number(a.YEAR)));
+          results.sort((a, b) => (Number(b.YEAR) - Number(a.YEAR)));
           break;
         default:
-          content.sort((a, b) => (a.STATE <= b.STATE ? 1 : -1));
+          results.sort((a, b) => (a.STATE <= b.STATE ? 1 : -1));
           break;
       }
-      console.log(content.length);
-      res.send(content);
+      // is there a more concise way of doing this?
+      const content = {
+        title: 'Bigfoot Sightings',
+        sightings: results,
+      };
+      res.render('year', content);
     }
     else {
       // 400 BAD REQUEST
