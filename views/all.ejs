@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <h1><a href="/"> Bigfoot Sightings</a></h1>
+    <h2><%= header %></h2>
+    <nav>
+      <ul>
+        <li><a href="year-sightings/">Listings by Year</a></li>
+      </ul>
+    </nav>
+    <ol>
+      <% sightings.forEach((sighting, index) => { %>
+      <li>
+        <a href="<%= `/sightings/${index+1}` %> "> <%= `Sighting no. ${sighting.REPORT_NUMBER}` %> </a>
+      </li>
+      <% }) %>
+    </ol>
+  </body>
+</html>

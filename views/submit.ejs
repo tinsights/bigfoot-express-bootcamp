@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bigfoot Sightings</title>
+  </head>
+  <body>
+    <form action="/submit" method="POST">
+      <label for="year">Year:</label>
+      <input name="year" id="year" type="number" min="1900" max="2099" step="1" value="2021" required /><br />
+      <label for="state">State:</label><br />
+      <input type="text" id="state" name="state" required /><br />
+      <label for="observation">Observation:</label><br />
+      <input type="text" id="observation" name="observation" required /><br />
+      <input type="submit" value="Submit" />
+    </form>
+  </body>
+</html>

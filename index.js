@@ -4,14 +4,19 @@ import { read } from './jsonFileStorage.js';
 const app = express();
 // set ejs as the view engine, default folder ./views/
 app.set('view engine', 'ejs');
-
+app.use(express.urlencoded({ extended: false }));
 setTimeout(() => {
   // GET method routers
   app.get('/', landingPage);
+  app.get('/all', listSightings);
   app.get('/sightings/:index', sightingByIndex);
   // comfortable / more comfortable
   app.get('/year-sightings/:year?', sightingsByYear);
-
+  app.get('/submit', submitSighting);
+  app.post('/submit', (request, response) => {
+    console.log('request body:', request.body);
+    response.send('we saved your recipe');
+  });
   // this line is only reached if and only if no other
   // app.get event loop fires. i.e. for any route not defined.
   app.use((req, res) => {
@@ -24,6 +29,11 @@ setTimeout(() => {
 // landing page
 const landingPage = (req, res) => {
   read('data.json', (err, jsonObj) => {
+    res.render('index');
+  });
+};
+const listSightings = (req, res) => {
+  read('data.json', (err, jsonObj) => {
     if (err) throw err;
     // get sightings array from JSON
     const { sightings } = jsonObj;
@@ -35,10 +45,11 @@ const landingPage = (req, res) => {
       header: 'All Bigfoot Sightings',
       sightings,
     };
-    res.render('index', content);
+    res.render('all', content);
   });
 };
 
+// /sightings/:index
 // function that returns one specific sighting if it exists
 const sightingByIndex = (req, res) => {
   read('data.json', (err, jsonObj) => {
@@ -49,7 +60,6 @@ const sightingByIndex = (req, res) => {
     const desiredIndex = req.params.index - 1;
     // check if index exists
     if (desiredIndex < sightings.length) {
-      // using +desiredIndex below for sneaky change to Number from String.
       const content = {
         title: 'Bigfoot Sightings',
         sighting: sightings[desiredIndex],
@@ -74,7 +84,8 @@ const sightingsByYear = (req, res) => {
     const sightingsArray = jsonObj.sightings;
     // get year from url
     // leaving it as string for comparison with value in JSON.
-    const desiredYear = req.params.year;
+    // taking in either /:year or ?year=, whichever exists
+    const desiredYear = req.query.year || req.params.year;
     let results = [];
     if (!desiredYear) {
       // if no year specified, return the entire database
@@ -105,6 +116,7 @@ const sightingsByYear = (req, res) => {
       // is there a more concise way of doing this?
       const content = {
         title: 'Bigfoot Sightings',
+        header: 'Sightings by Year',
         sightings: results,
       };
       res.render('year', content);
@@ -114,6 +126,10 @@ const sightingsByYear = (req, res) => {
       res.status(400).send('No sightings for that year.');
     }
   });
+};
+
+const submitSighting = (req, res) => {
+  res.render('submit');
 };
 
 /* Was attempting to clean up data.json, but gave up when i saw the num of duplicates

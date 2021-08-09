@@ -4,12 +4,24 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><a href="/"> <%= title %></title>
+    <title><%= title %></title>
   </head>
   <body>
     <h1>
-      <a href="/"> <%= title %> </a>
+      <h1><a href="/"> Bigfoot Sightings</a></h1>
     </h1>
+    <h2><%= header %> </a></h2>
+    <nav>
+      <ul>
+        <li><a href="?sort=asc">Sort ascending</a></li>
+        <li><a href="?sort=desc">Sort descending</a></li>
+      </ul>
+    </nav>
+    <form action="">
+      <label for="year">Select a year:</label>
+      <input name="year" id="year" type="number" min="1900" max="2099" step="1" value="2016" required />
+      <button type="submit">Submit</button>
+    </form>
     <% sightings.forEach((sighting, index) => { %>
     <h2>REPORT No. <%= sighting.REPORT_NUMBER %></h2>
     <div>
