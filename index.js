@@ -5,10 +5,36 @@ const app = express();
 // set ejs as the view engine, default folder ./views/
 app.set('view engine', 'ejs');
 
-// generic landing page
-const handleIncomingRequest = (request, response) => {
-  console.log('request came in');
-  response.send('yay');
+setTimeout(() => {
+  // GET method routers
+  app.get('/', landingPage);
+  app.get('/sightings/:index', sightingByIndex);
+  // comfortable / more comfortable
+  app.get('/year-sightings/:year?', sightingsByYear);
+
+  // this line is only reached if and only if no other
+  // app.get event loop fires. i.e. for any route not defined.
+  app.use((req, res) => {
+    res.status(404).send('404 NOT FOUND');
+  });
+
+  app.listen(3004);
+}, 0);
+
+// landing page
+const landingPage = (req, res) => {
+  read('data.json', (err, jsonObj) => {
+    if (err) throw err;
+    // get sightings array from JSON
+    const { sightings } = jsonObj;
+    sightings.sort((a, b) => (Number(a.REPORT_NUMBER) - Number(b.REPORT_NUMBER)));
+    const content = {
+      title: 'Bigfoot Sightings',
+      header: 'All Bigfoot Sightings',
+      sightings,
+    };
+    res.render('index', content);
+  });
 };
 
 // function that returns one specific sighting if it exists
@@ -98,17 +124,3 @@ const sightingsByYear = (req, res) => {
     }
   });
 };
-
-// GET method routers
-app.get('/', handleIncomingRequest);
-app.get('/sightings/:index', sightingByIndex);
-// comfortable / more comfortable
-app.get('/year-sightings/:year?', sightingsByYear);
-
-// this line is only reached if and only if no other
-// app.get event loop fires. i.e. for any route not defined.
-app.use((req, res) => {
-  res.status(404).send('404 NOT FOUND');
-});
-
-app.listen(3004);
