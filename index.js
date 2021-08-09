@@ -27,7 +27,8 @@ const landingPage = (req, res) => {
     if (err) throw err;
     // get sightings array from JSON
     const { sightings } = jsonObj;
-    // wanted to sort sighting by report number, but figured will just link to index sigh.
+    /* wanted to sort sighting by report number,
+    but figured will just link to index to use sightingBy Index function */
     // sightings.sort((a, b) => (Number(a.REPORT_NUMBER) - Number(b.REPORT_NUMBER)));
     const content = {
       title: 'Bigfoot Sightings',
@@ -43,26 +44,17 @@ const sightingByIndex = (req, res) => {
   read('data.json', (err, jsonObj) => {
     if (err) throw err;
     // get sightings array from JSON
-    const sightingArray = jsonObj.sightings;
+    const { sightings } = jsonObj;
     // get index from url
     const desiredIndex = req.params.index - 1;
     // check if index exists
-    if (desiredIndex < sightingArray.length) {
-      const sighting = sightingArray[req.params.index];
+    if (desiredIndex < sightings.length) {
       // using +desiredIndex below for sneaky change to Number from String.
-      const content = `
-                        <html>
-                          <body>
-                            <h1>BIGFOOT SIGHTINGS</h1>
-                            <h2>SIGHTING No. ${+desiredIndex}
-                            <div>
-                              <p>YEAR: ${sighting.YEAR}</p>
-                              <p>STATE: ${sighting.STATE}</p>
-                              <p>OBSERVED BY: ${sighting.OBSERVED}
-                          </body>
-                        </html>
-                      `;
-      res.send(content);
+      const content = {
+        title: 'Bigfoot Sightings',
+        sighting: sightings[desiredIndex],
+      };
+      res.render('sighting', content);
     } else {
       // 400 notti notti request
       res.status(400).send('No such sighting');
