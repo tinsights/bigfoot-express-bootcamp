@@ -27,7 +27,8 @@ const landingPage = (req, res) => {
     if (err) throw err;
     // get sightings array from JSON
     const { sightings } = jsonObj;
-    sightings.sort((a, b) => (Number(a.REPORT_NUMBER) - Number(b.REPORT_NUMBER)));
+    // wanted to sort sighting by report number, but figured will just link to index sigh.
+    // sightings.sort((a, b) => (Number(a.REPORT_NUMBER) - Number(b.REPORT_NUMBER)));
     const content = {
       title: 'Bigfoot Sightings',
       header: 'All Bigfoot Sightings',
@@ -44,7 +45,7 @@ const sightingByIndex = (req, res) => {
     // get sightings array from JSON
     const sightingArray = jsonObj.sightings;
     // get index from url
-    const desiredIndex = req.params.index;
+    const desiredIndex = req.params.index - 1;
     // check if index exists
     if (desiredIndex < sightingArray.length) {
       const sighting = sightingArray[req.params.index];
@@ -53,7 +54,7 @@ const sightingByIndex = (req, res) => {
                         <html>
                           <body>
                             <h1>BIGFOOT SIGHTINGS</h1>
-                            <h2>SIGHTING No. ${+desiredIndex + 1}
+                            <h2>SIGHTING No. ${+desiredIndex}
                             <div>
                               <p>YEAR: ${sighting.YEAR}</p>
                               <p>STATE: ${sighting.STATE}</p>
@@ -124,3 +125,23 @@ const sightingsByYear = (req, res) => {
     }
   });
 };
+
+/* Was attempting to clean up data.json, but gave up when i saw the num of duplicates
+
+const findDuplicates = (arr) => {
+    // JS by default uses a crappy string compare.
+    // (we use slice to clone the array so the
+    // original array won't be modified)
+    const results = [];
+    for (let i = 0; i < arr.length - 1; i++) {
+      if ((arr[i + 1] == arr[i]) && !results.some((el) => el === arr[i])) {
+        results.push(arr[i]);
+      }
+    }
+    return results;
+  };
+
+  const reportNumbers = sightings.map((sighting) => sighting.REPORT_NUMBER);
+    console.log(findDuplicates(reportNumbers));
+
+*/
