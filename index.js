@@ -67,7 +67,12 @@ const listSightings = (req, res) => {
         if (req.query.order === 'asc') {
           sightings.sort((a, b) => (b.STATE <= a.STATE ? -1 : 1));
         } else {
-          sightings.sort((a, b) => (a.STATE <= b.STATE ? -1 : 1));
+          sightings.sort((a, b) => {
+            if (a.STATE[0] >= b.STATE[0]) {
+              return 1;
+            }
+            return -1;
+          });
         }
         break;
       default:
@@ -133,7 +138,7 @@ const sightingsByYear = (req, res) => {
     else {
     // get array of sightings from required year
     // will be incomplete list as some sightings have
-    // "YEAR: early 1990s" or "YEAR: 2000/01"
+    // "YEAR: early 1990s" or "YEAR: 2000/01" | ignoring dirty data
     // tried using .includes() but couldn't get it to work - must be another way
       results = sightingsArray.filter((sighting) => sighting.YEAR === desiredYear);
     }
@@ -148,11 +153,17 @@ const sightingsByYear = (req, res) => {
         case ('desc'):
           results.sort((a, b) => (Number(b.YEAR) - Number(a.YEAR)));
           break;
+        // default sorting by state.. for some reason
         default:
-          results.sort((a, b) => (a.STATE <= b.STATE ? 1 : -1));
+          results.sort((a, b) => {
+            if (a.STATE[0] >= b.STATE[0]) {
+              return 1;
+            }
+            return -1;
+          });
           break;
       }
-      // is there a more concise way of doing this?
+      // consolidate new content to populate view template
       const content = {
         title: 'Bigfoot Sightings',
         header: 'Sightings by Year',
@@ -174,13 +185,16 @@ const submitSighting = (req, res) => {
       break;
     case ('POST'):
       console.log('req.body :>> ', req.body);
-      add('data.json', 'sightings', req.body, (err) => {
+      add('data.json', 'sightings', req.body, (err, jsonContentStr) => {
         if (err) {
           res.status(500).send('DB write error.');
         }
         // redirect to new sighting
         // wont work for multiple submissions at the same time
-        res.redirect('/sightings/new-sighting');
+        const newObj = JSON.parse(jsonContentStr);
+        const { sightings } = newObj;
+        const newIndex = sightings.length;
+        res.redirect(`/sightings/${newIndex}`);
       });
       break;
     default:
