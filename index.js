@@ -58,9 +58,9 @@ const listSightings = (req, res) => {
     switch (req.query.sortBy) {
       case ('year'):
         if (req.query.order === 'asc') {
-          sightings.sort((a, b) => (Number(b.YEAR) - Number(a.YEAR)));
-        } else {
           sightings.sort((a, b) => (Number(a.YEAR) - Number(b.YEAR)));
+        } else {
+          sightings.sort((a, b) => (Number(b.YEAR) - Number(a.YEAR)));
         }
         break;
       case ('state'):
