@@ -1,5 +1,8 @@
+/* eslint-disable no-use-before-define */
 import express from 'express';
-import { read } from './jsonFileStorage.js';
+import {
+  read, add, edit, write,
+} from './jsonFileStorage.js';
 
 const app = express();
 // set ejs as the view engine, default folder ./views/
@@ -12,11 +15,12 @@ setTimeout(() => {
   app.get('/sightings/:index', sightingByIndex);
   // comfortable / more comfortable
   app.get('/year-sightings/:year?', sightingsByYear);
+  // submit page and post functions
   app.get('/submit', submitSighting);
-  app.post('/submit', (request, response) => {
-    console.log('request body:', request.body);
-    response.send('we saved your recipe');
-  });
+  app.post('/submit', submitSighting);
+  // unnecessary
+  app.get('/random', randomSighting);
+
   // this line is only reached if and only if no other
   // app.get event loop fires. i.e. for any route not defined.
   app.use((req, res) => {
@@ -26,20 +30,50 @@ setTimeout(() => {
   app.listen(3004);
 }, 0);
 
+// one-off cleaning of data.json
+// read('data.json', (err, jsonObj) => {
+//   const { sightings } = jsonObj;
+//   // sorts by current report number
+//   sightings.sort((a, b) => (Number(a.REPORT_NUMBER) - Number(b.REPORT_NUMBER)));
+//   // re-writes report number with index number
+//   sightings.forEach((sighting, index) => {
+//     sighting.REPORT_NUMBER = index + 1;
+//   });
+//   const sortedData = {
+//     sightings,
+//   };
+//   write('data.json', sortedData, (err, jsonStr) => {});
+// });
+
 // landing page
 const landingPage = (req, res) => {
-  read('data.json', (err, jsonObj) => {
-    res.render('index');
-  });
+  res.render('index');
 };
 const listSightings = (req, res) => {
   read('data.json', (err, jsonObj) => {
     if (err) throw err;
     // get sightings array from JSON
     const { sightings } = jsonObj;
-    /* wanted to sort sighting by report number,
-    but figured will just link to index to use sightingBy Index function */
-    // sightings.sort((a, b) => (Number(a.REPORT_NUMBER) - Number(b.REPORT_NUMBER)));
+    console.log('req.query :>> ', req.query);
+    switch (req.query.sortBy) {
+      case ('year'):
+        if (req.query.order === 'asc') {
+          sightings.sort((a, b) => (Number(b.YEAR) - Number(a.YEAR)));
+        } else {
+          sightings.sort((a, b) => (Number(a.YEAR) - Number(b.YEAR)));
+        }
+        break;
+      case ('state'):
+        if (req.query.order === 'asc') {
+          sightings.sort((a, b) => (b.STATE <= a.STATE ? -1 : 1));
+        } else {
+          sightings.sort((a, b) => (a.STATE <= b.STATE ? -1 : 1));
+        }
+        break;
+      default:
+        sightings.sort((a, b) => (Number(a.REPORT_NUMBER) - Number(b.REPORT_NUMBER)));
+    }
+
     const content = {
       title: 'Bigfoot Sightings',
       header: 'All Bigfoot Sightings',
@@ -57,12 +91,17 @@ const sightingByIndex = (req, res) => {
     // get sightings array from JSON
     const { sightings } = jsonObj;
     // get index from url
-    const desiredIndex = req.params.index - 1;
+    let desiredIndex = req.params.index;
+    console.log('desiredIndex :>> ', desiredIndex);
+    if (desiredIndex === 'new-sighting') {
+      desiredIndex = sightings.length;
+      console.log('desiredIndex :>> ', desiredIndex);
+    }
     // check if index exists
-    if (desiredIndex < sightings.length) {
+    if (desiredIndex <= sightings.length) {
       const content = {
         title: 'Bigfoot Sightings',
-        sighting: sightings[desiredIndex],
+        sighting: sightings[desiredIndex - 1],
       };
       res.render('sighting', content);
     } else {
@@ -129,7 +168,33 @@ const sightingsByYear = (req, res) => {
 };
 
 const submitSighting = (req, res) => {
-  res.render('submit');
+  switch (req.method) {
+    case ('GET'):
+      res.render('submit');
+      break;
+    case ('POST'):
+      console.log('req.body :>> ', req.body);
+      add('data.json', 'sightings', req.body, (err) => {
+        if (err) {
+          res.status(500).send('DB write error.');
+        }
+        // redirect to new sighting
+        // wont work for multiple submissions at the same time
+        res.redirect('/sightings/new-sighting');
+      });
+      break;
+    default:
+      res.status(503).send('Internal Service Error');
+      console.log(res.method);
+  }
+};
+
+const randomSighting = (req, res) => {
+  read('data.json', (err, jsonObj) => {
+    const { sightings } = jsonObj;
+    const random = Math.floor(Math.random() * sightings.length) + 1;
+    res.redirect(`/sightings/${random}`);
+  });
 };
 
 /* Was attempting to clean up data.json, but gave up when i saw the num of duplicates

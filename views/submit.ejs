@@ -5,15 +5,30 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bigfoot Sightings</title>
+    <style>
+      h1,
+      h2 {
+        text-align: center;
+      }
+      label,
+      input {
+        display: inline-block;
+        text-align: left;
+        margin: 0.5em;
+        width: 10em;
+      }
+    </style>
   </head>
   <body>
+    <h1><a href="/">Bigfoot Sightings</a></h1>
+    <h2>Submit a Sighting</h2>
     <form action="/submit" method="POST">
-      <label for="year">Year:</label>
-      <input name="year" id="year" type="number" min="1900" max="2099" step="1" value="2021" required /><br />
-      <label for="state">State:</label><br />
-      <input type="text" id="state" name="state" required /><br />
-      <label for="observation">Observation:</label><br />
-      <input type="text" id="observation" name="observation" required /><br />
+      <label for="YEAR">Year:</label>
+      <input name="YEAR" id="YEAR" type="number" min="1900" max="2099" step="1" value="2021" required /><br />
+      <label for="STATE">State:</label>
+      <input type="text" id="STATE" name="STATE" required /><br />
+      <label for="OBSERVED">Observation:</label>
+      <input type="text" id="OBSERVED" name="OBSERVED" required /><br />
       <input type="submit" value="Submit" />
     </form>
   </body>

@@ -9,15 +9,22 @@
   <body>
     <h1><a href="/"> Bigfoot Sightings</a></h1>
     <h2><%= header %></h2>
-    <nav>
-      <ul>
-        <li><a href="year-sightings/">Listings by Year</a></li>
-      </ul>
-    </nav>
+    <label>Sort by:</label>
+    <form action="">
+      <select name="sortBy" id="sortBy">
+        <option value="year">Year</option>
+        <option value="state">State</option>
+      </select>
+      <select name="order" id="order">
+        <option value="asc">Asc</option>
+        <option value="desc">Desc</option>
+      </select>
+      <button type="submit">Sort</button>
+    </form>
     <ol>
       <% sightings.forEach((sighting, index) => { %>
       <li>
-        <a href="<%= `/sightings/${index+1}` %> "> <%= `Sighting no. ${sighting.REPORT_NUMBER}` %> </a>
+        <a href="<%= `/sightings/${sighting.REPORT_NUMBER}` %> "> <%= `Sighting no. ${sighting.REPORT_NUMBER}` %> </a>
       </li>
       <% }) %>
     </ol>
